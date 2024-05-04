@@ -72,6 +72,83 @@ app.get('/restaurants/:id', async (req, res) => {
   }
 })
 
+app.get('/tags', async (req, res) => {
+  try {
+    const db = client.db("restaurants");
+    const usersCollection = db.collection("restaurants");
+    const restaurants = await usersCollection.find({}).toArray();
+
+    // Create a map of tags to arrays of restaurants
+    const tagMap = new Map();
+    for (const restaurant of restaurants) {
+      for (const tag of restaurant.tags) {
+        if (!tagMap.has(tag)) {
+          tagMap.set(tag, []);
+        }
+        tagMap.get(tag).push(restaurant);
+      }
+    }
+
+    // Convert the map to an array of tag objects
+    const tags = Array.from(tagMap.entries()).map(([tag, restaurants]) => ({ tag, restaurants }));
+
+    // Sort the tags by the number of restaurants in each tag
+    tags.sort((a, b) => b.restaurants.length - a.restaurants.length);
+
+    res.status(200).send(tags);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching tags');
+  }
+})
+
+app.get('/tags/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = client.db("restaurants");
+    const usersCollection = db.collection("restaurants");
+    const restaurants = await usersCollection.find({ tags: id }).toArray();
+
+    if (restaurants.length === 0) {
+      return res.status(404).send('Tag not found');
+    }
+
+    res.status(200).send(restaurants);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching restaurants with tag');
+  }
+})
+
+app.get('/cities', async (req, res) => {
+  try {
+    const db = client.db("restaurants");
+    const usersCollection = db.collection("restaurants");
+    const restaurants = await usersCollection.find({}).toArray();
+
+    // Create a map of cities to arrays of restaurants
+    const cityMap = new Map();
+    for (const restaurant of restaurants) {
+      const city = restaurant.address && restaurant.address.city;
+      if (!cityMap.has(city)) {
+        cityMap.set(city, []);
+      }
+      cityMap.get(city).push(restaurant);
+    }
+
+    // Convert the map to an array of city objects
+    const cities = Array.from(cityMap.entries()).map(([city, restaurants]) => ({ city, restaurants }));
+
+    // Sort the cities by the number of restaurants in each city
+    cities.sort((a, b) => b.restaurants.length - a.restaurants.length);
+
+    res.status(200).send(cities);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching cities');
+  }
+})
+
 app.get('/', (req, res) => {
   res.send('Welcome to the Yelp API!')
 })
