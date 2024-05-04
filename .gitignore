@@ -1,0 +1,12 @@
+# Express
+node_modules/
+
+# Environment variables
+.env
+
+# Code coverage reports
+coverage/
+
+# Distribution files
+dist/
+.vercel
