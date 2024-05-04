@@ -149,6 +149,23 @@ app.get('/cities', async (req, res) => {
   }
 })
 
+app.get('/cities/:city', async (req, res) => {
+  try {
+    const db = client.db("restaurants");
+    const usersCollection = db.collection("restaurants");
+    const city = req.params.city;
+
+    // Find all restaurants in the specified city
+    const cityRestaurants = await usersCollection.find({ "location.city": city }).toArray();
+
+    // Return the restaurants in the response
+    res.status(200).send(cityRestaurants);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching city restaurants');
+  }
+})
+
 app.get('/', (req, res) => {
   res.send('Welcome to the Yelp API!')
 })
