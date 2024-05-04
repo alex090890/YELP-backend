@@ -52,6 +52,24 @@ app.get('/restaurants', async (req, res) => {
     console.error(err);
     res.status(500).send('Error fetching restaurants');
   }
+});
+
+app.get('/restaurants/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = client.db("restaurants");
+    const usersCollection = db.collection("restaurants");
+    const restaurant = await usersCollection.findOne({ id });
+
+    if (!restaurant) {
+      return res.status(404).send('Restaurant not found');
+    }
+
+    res.status(200).send(restaurant);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching restaurant');
+  }
 })
 
 app.get('/', (req, res) => {
